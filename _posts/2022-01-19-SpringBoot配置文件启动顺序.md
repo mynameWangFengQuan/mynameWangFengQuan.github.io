@@ -40,9 +40,9 @@ SpringBoot可以从以下位置加载配置，优先级从高到低，高优先�
 
 5. RandomValuePropertySource配置的random.*属性值
 
-==由jar包外向jar包内进行寻找；==（*.properties>*.yml）
+由jar包外向jar包内进行寻找（*.properties>*.yml）
 
-==优先加载带profile==
+优先加载带profile
 
 6. jar包外部的application-{profile}.properties或application.yml(带spring.profile)配置文件
 
@@ -50,7 +50,7 @@ SpringBoot可以从以下位置加载配置，优先级从高到低，高优先�
 
 8. --spring.config.location=C:/application.properties
 
-==再来加载不带profile==
+再来加载不带profile
 
 9. jar包外部的application.properties或application.yml(不带spring.profile)配置文件
 
