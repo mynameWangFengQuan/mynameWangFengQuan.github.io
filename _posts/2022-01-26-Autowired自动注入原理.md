@@ -15,11 +15,11 @@ tags:
 
 ---
 
-# @Autowired 的实现原理 
+## @Autowired 的实现原理 
 
 > 在平时工作中，只要是做Java开发，基本都离不开Spring框架，Spring的一大核心功能就是IOC，它能帮助我们实现自动装配，基本上每天我们都会使用到@Autowired注解来为我们自动装配属性，那么你知道Autowired注解的原理吗？在阅读本文之前，可以先思考一下以下几个问题。
 
-## 1. Demo
+### 1. Demo
 
 > 先按照如下示例搭建一下本文的demo工程
 
@@ -77,11 +77,11 @@ public class MainApplication {
 
 - 运行main()方法，最终会在query()方法中打印出UserService对象。
 
-## 2. 实现原理：AutowiredAnnotationBeanPostProcessor
+### 2. 实现原理：AutowiredAnnotationBeanPostProcessor
 
 > 通过上面的demo我们完成了对OrderServiceImpl的自动装配，为其属性userService完成了赋值操作，那么Spring是如何通过@Autowired来实现赋值的呢？我们知道，Spring在容器启动阶段，会先实例化bean，然后再对bean进行初始化操作。在初始化阶段，会通过调用Bean后置处理来完成对属性的赋值等操作，那么同理，要想实现@Autowired的功能，肯定也是通过后置处理器来完成的。这个后置处理器就是AutowiredAnnotationBeanPostProcessor。接下来我们就来看看这个类的源码。
 
-### 3.1 何时被加入
+#### 3.1 何时被加入
 
 - 在分析AutowiredAnnotationBeanPostProcessor的工作原理之前，我们需要先知道它是何时被加入到Spring容器当中的。毕竟只有先将它放入到容器中了，才能让它工作。
 - 当我们调用`AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class)`启动容器的时候，在构造方法中会调用到`this()`方法，在`this()`方法中最终会调用到`registerAnnotationConfigProcessors()`方法，在该方法中，Spring会向容器注册7个Spring内置的Bean，其中就包括AutowiredAnnotationBeanPostProcessor。
@@ -110,7 +110,7 @@ public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(
 }
 ```
 
-### 3.2 何时被调用
+#### 3.2 何时被调用
 
 > AutowiredAnnotationBeanPostProcessor是何时被调用的呢？
 
@@ -165,7 +165,7 @@ public PropertyValues postProcessPropertyValues(
 }
 ```
 
-#### 3.2.1 findAutowiringMetadata()
+##### 3.2.1 findAutowiringMetadata()
 
 - 为什么上面分析时，只说了findAutowiringMetadata()方法会解析出Autowired注解、@Inject和@Value注解呢？这是因为在AutowiredAnnotationBeanPostProcessor中定义了这样一个全局变量：
 
@@ -192,7 +192,7 @@ public AutowiredAnnotationBeanPostProcessor() {
 }
 ```
 
-#### 3.2.2 metadata.inject()
+##### 3.2.2 metadata.inject()
 
 - 对于属性上加了Autowired注解的，经过上一步解析后，会将字段解析为AutowiredFieldElement类型；如果是方法上加了Autowired注解，则会解析为AutowiredMethodElement类型。它们均是InjectedElement类的子类，里面封装了属性名，属性类型等信息。对于@Resource,@LookUp等注解被解析后，也会解析成对应的InjectedElement的子类：ResourceElement、LookUpElement，但是这两个注解是在其他后置处理器中被解析出来的，并不是在AutowiredAnnotationBeanPostProcessor中解析的。
 - metadata.inject()方法最终会调用InjectedElement类的inject()方法。对于本文中的demo，此时userService属性被解析后对应的InjectedElement是AutowiredFieldElement类，所以在此时会调用AutowiredFieldElement.inject()方法。
@@ -443,7 +443,7 @@ protected String determineAutowireCandidate(Map<String, Object> candidates, Depe
 - 当matchingBeans大于1，且通过determineAutowireCandidate()方法确认了使用哪个bean注入时，或者当matchingBeans=1时，后面就会根据确定的beanName，来从容器中找到对应的Bean，然后将Bean返回，最后在`AutowiredFeildElement.inject()`方法中，通过反射进行注入，完成自动装配。
 - 至此，AutowiredAnnotationBeanPostProcessor就通过postProcessPropertyValues()方法完成了自动装配。以上就是@Autowired注解的实现原理。
 
-## 3. 自动装配的模型
+### 3. 自动装配的模型
 
 > 在文章的开头，我问了一个问题：自动装配的模型是什么？有哪几种？和Autowired注解有什么关联？实际上这个问题，和今天的主角AutowiredAnnotationBeanPostProcessor没有任何关系。但是为什么又把它放在这篇文章中提出来呢？这是因为@Autowired注解的实现原理和自动装配模型极为容易混淆。
 
@@ -570,7 +570,7 @@ private void processBeanDefinitions(Set<BeanDefinitionHolder> beanDefinitions) {
 
 - 综上，自动装配的模型中的ByName、ByType与@Autowired装配的ByName、ByType不是同一个含义，两者完全没有关系。
 
-## 4. 总结
+### 4. 总结
 
 > 总结之前，先回答一下文章开头的三个问题。1）@Autowired注解的实现是通过后置处理器AutowiredAnnotationBeanPostProcessor类的postProcessPropertyValues()方法实现的。2）当自动装配时，从容器中如果发现有多个同类型的属性时，@Autowired注解会先根据类型判断，然后根据@Primary、@Priority注解判断，最后根据属性名与beanName是否相等来判断，如果还是不能决定注入哪一个bean时，就会抛出NoUniqueBeanDefinitionException异常。3）@Autowired自动装配中byName、byType与自动装配的模型中的byName、byTYpe没有任何关系，两者含义完全不一样，前者是实现技术的手段，后者是用来定义BeanDefiniton中autowireMode属性的值的类型。
 
