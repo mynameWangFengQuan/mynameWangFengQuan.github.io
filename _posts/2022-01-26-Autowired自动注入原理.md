@@ -1,21 +1,19 @@
 ---
-
 layout:     post
-title:        @Autowired 的实现原理
+title:      @Autowired的实现原理
 subtitle:   spring源码
-date:        2022-01-27
+date:       2022-01-27
 author:     王凤权
 header-img: img/the-first.png
 catalog:   true
 tags:
     - 面试题
-    - JAVA
+    - JAVA 
     - Spring
     - Spring源码
 
+
 ---
-
-
 
 # @Autowired 的实现原理 
 
